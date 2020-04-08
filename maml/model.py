@@ -111,7 +111,7 @@ def ModelConvMiniImagenet(out_features, hidden_size=64):
                          feature_size=5 * 5 * hidden_size)
 
 def ModelMLPSinusoid(hidden_sizes=[40, 40]):
-    return MetaMLPModel(1, 1, hidden_sizes)
+    return MetaMLPModel(25, 1, hidden_sizes)
 
 if __name__ == '__main__':
     model = ModelMLPSinusoid()
