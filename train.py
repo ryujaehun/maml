@@ -9,7 +9,7 @@ from torchmeta.utils.data import BatchMetaDataLoader
 from torch.utils.data import  DataLoader
 from maml.datasets import get_benchmark_by_name
 from maml.metalearners import ModelAgnosticMetaLearning
-
+from torch.utils.tensorboard import SummaryWriter
 def main(args):
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
     device = torch.device('cuda' if args.use_cuda
@@ -34,6 +34,7 @@ def main(args):
         logging.info('Saving configuration file in `{0}`'.format(
                      os.path.abspath(os.path.join(folder, 'config.json'))))
 
+    writer = SummaryWriter(folder)
     benchmark = get_benchmark_by_name(args.dataset,
                                       args.num_ways,
                                       args.num_shots,
@@ -73,11 +74,13 @@ def main(args):
         metalearner.train(meta_train_dataloader,
                           max_batches=args.num_batches,
                           verbose=args.verbose,
+                          writer=writer,
                           first=first,
                           desc='Training',
                           leave=False)
         results = metalearner.evaluate(meta_val_dataloader,
                                        max_batches=args.num_batches,
+                                       writer=writer,
                                        verbose=args.verbose,
                                        desc=epoch_desc.format(epoch + 1))
         # Save best model

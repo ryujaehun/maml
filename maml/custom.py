@@ -1,5 +1,5 @@
 import pandas as pd
-import glob
+import glob,os
 import warnings
 import numpy as np
 import torch
@@ -37,11 +37,11 @@ class KnobsDataset(Dataset):
         self.way = way
         self.dataset_type = dataset_type
         if dataset_type == 'train':
-            root = '/home/jaehun/workspace/pytorch-maml/data/cpu_dataset/*pkl'
+            root = os.path.join(os.getcwd(),'data/cpu_dataset/*pkl')
         elif dataset_type == 'test':
-            root = '/home/jaehun/workspace/pytorch-maml/data/gpu_dataset/*pkl'
+            root = os.path.join(os.getcwd(),'data/gpu_dataset/*pkl')
         elif dataset_type == 'val':
-            root = '/home/jaehun/workspace/pytorch-maml/data/gpu_dataset/*pkl'
+            root = os.path.join(os.getcwd(),'data/gpu_dataset/*pkl')
         else:
             raise Exception('please chice dataset type train,test and val')
 

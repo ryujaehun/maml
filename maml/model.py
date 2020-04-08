@@ -110,7 +110,7 @@ def ModelConvMiniImagenet(out_features, hidden_size=64):
     return MetaConvModel(3, out_features, hidden_size=hidden_size,
                          feature_size=5 * 5 * hidden_size)
 
-def ModelMLPSinusoid(hidden_sizes=[40, 40]):
+def ModelMLPSinusoid(hidden_sizes=[80, 80]):
     return MetaMLPModel(25, 1, hidden_sizes)
 
 if __name__ == '__main__':

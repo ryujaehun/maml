@@ -68,7 +68,7 @@ class ModelAgnosticMetaLearning(object):
     def __init__(self, model, optimizer=None, step_size=0.1, first_order=False,
                  learn_step_size=False, per_param_step_size=False,
                  num_adaptation_steps=1, scheduler=None,
-                 loss_function=F.cross_entropy, device=None):
+                 loss_function=F.mse_loss, device=None):
         self.model = model.to(device=device)
         self.optimizer = optimizer
         self.step_size = step_size
@@ -77,6 +77,8 @@ class ModelAgnosticMetaLearning(object):
         self.scheduler = scheduler
         self.loss_function = loss_function
         self.device = device
+        self.num_train=0
+        self.num_eval=0
 
         if per_param_step_size:
             self.step_size = OrderedDict((name, torch.tensor(step_size,
@@ -154,11 +156,14 @@ class ModelAgnosticMetaLearning(object):
 
         return params, results
 
-    def train(self, dataloader, max_batches=500, verbose=True, first=True, **kwargs):
+    def train(self, dataloader, max_batches=500, verbose=True, writer=None,first=True, **kwargs):
         self.first_order=first
         with tqdm(total=max_batches, disable=not verbose, **kwargs) as pbar:
             for results in self.train_iter(dataloader, max_batches=max_batches):
                 pbar.update(1)
+                writer.add_scalar('mean_outer_loss',  results['mean_outer_loss'],self.num_train)
+                writer.add_scalar('inner_losses', np.mean(results['inner_losses']),self.num_train)
+                writer.add_scalar('outer_losses',  np.mean(results['outer_losses']),self.num_train)
                 postfix = {'mean_outer_loss': '{0:.4f} '.format(results['mean_outer_loss']),
                            'inner_losses': '{0:.4f} '.format(np.mean(results['inner_losses'])),
                            'outer_losses': '{0:.4f} '.format(np.mean(results['outer_losses']))}
@@ -166,6 +171,7 @@ class ModelAgnosticMetaLearning(object):
                     postfix['accuracy'] = '{0:.4f}'.format(
                         np.mean(results['accuracies_after']))
                 pbar.set_postfix(**postfix)
+                self.num_train+=1
 
     def train_iter(self, dataloader, max_batches=500):
         if self.optimizer is None:
@@ -196,16 +202,19 @@ class ModelAgnosticMetaLearning(object):
 
                 num_batches += 1
 
-    def evaluate(self, dataloader, max_batches=500, verbose=True, **kwargs):
+    def evaluate(self, dataloader, max_batches=500, writer=None,verbose=True, **kwargs):
         mean_outer_loss, mean_accuracy, count = 0., 0., 0
         with tqdm(total=max_batches, disable=not verbose, **kwargs) as pbar:
             for results in self.evaluate_iter(dataloader, max_batches=max_batches):
                 pbar.update(1)
                 count += 1
+                
                 mean_outer_loss += (results['mean_outer_loss']
                                     - mean_outer_loss) / count
                 postfix = {'loss': '{0:.4f}'.format(mean_outer_loss)}
+                writer.add_scalar('loss', mean_outer_loss,self.num_eval)
                 pbar.set_postfix(**postfix)
+                self.num_eval+=1
         mean_results = {'mean_outer_loss': mean_outer_loss}
         return mean_results
 
@@ -226,13 +235,3 @@ class ModelAgnosticMetaLearning(object):
 MAML = ModelAgnosticMetaLearning
 
 
-class FOMAML(ModelAgnosticMetaLearning):
-    def __init__(self, model, optimizer=None, step_size=0.1,
-                 learn_step_size=False, per_param_step_size=False,
-                 num_adaptation_steps=1, scheduler=None,
-                 loss_function=F.cross_entropy, device=None):
-        super(FOMAML, self).__init__(model, optimizer=optimizer, first_order=True,
-                                     step_size=step_size, learn_step_size=learn_step_size,
-                                     per_param_step_size=per_param_step_size,
-                                     num_adaptation_steps=num_adaptation_steps, scheduler=scheduler,
-                                     loss_function=loss_function, device=device)
