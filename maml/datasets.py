@@ -39,7 +39,7 @@ def get_benchmark_by_name(name,
                                      target_transform=transform,
                                      dataset_transform=dataset_transform)
 
-        model = ModelMLPSinusoid(hidden_sizes=[80, 80])
+        model = ModelMLPSinusoid(hidden_sizes=[64, 64])
         loss_function = F.mse_loss
     elif name == 'knobs':
 

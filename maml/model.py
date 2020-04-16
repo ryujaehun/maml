@@ -90,12 +90,15 @@ class MetaMLPModel(MetaModule):
         self.hidden_sizes = hidden_sizes
 
         layer_sizes = [in_features] + hidden_sizes
-        self.features = MetaSequential(OrderedDict([('layer{0}'.format(i + 1),
-            MetaSequential(OrderedDict([
-                ('linear', MetaLinear(hidden_size, layer_sizes[i + 1], bias=True)),
+        self.features = MetaSequential(OrderedDict([\
+                ('linear1', MetaLinear(in_features, hidden_sizes[0], bias=True)),
+                ('relu', nn.ReLU()),
+                ('linear2', MetaLinear(hidden_sizes[0], hidden_sizes[0], bias=True)),
+                ('relu', nn.ReLU()),
+                ('linear3', MetaLinear(hidden_sizes[0], hidden_sizes[0], bias=True)),
                 ('relu', nn.ReLU())
-            ]))) for (i, hidden_size) in enumerate(layer_sizes[:-1])]))
-        self.classifier = MetaLinear(hidden_sizes[-1], out_features, bias=True)
+            ]))
+        self.classifier = MetaLinear(hidden_sizes[0], out_features, bias=True)
 
     def forward(self, inputs, params=None):
         features = self.features(inputs, params=get_subdict(params, 'features'))
