@@ -6,17 +6,18 @@ from torchmeta.toy import Sinusoid
 from torchmeta.transforms import ClassSplitter, Categorical, Rotation
 from torchvision.transforms import ToTensor, Resize, Compose
 from .custom import KnobsDataset
-from maml.model import ModelConvOmniglot, ModelConvMiniImagenet, ModelMLPSinusoid
+from maml.model import ModelConvOmniglot, ModelConvMiniImagenet, ModelMLPSinusoid,MetaMLPModel
 from maml.utils import ToTensor1D
 
 Benchmark = namedtuple('Benchmark', 'meta_train_dataset meta_val_dataset '
                                     'meta_test_dataset model loss_function')
-
 def get_benchmark_by_name(name,
                           num_ways,
                           num_shots,
                           num_shots_test,
-                          hidden_size=None):
+                          hidden_size=None,
+                          types=None
+                          ):
     dataset_transform = ClassSplitter(shuffle=True,
                                       num_train_per_class=num_shots,
                                       num_test_per_class=num_shots_test)
@@ -42,13 +43,22 @@ def get_benchmark_by_name(name,
         model = ModelMLPSinusoid(hidden_sizes=[64, 64])
         loss_function = F.mse_loss
     elif name == 'knobs':
+        in_feature=num_shots*num_ways
+        hidden_sizes=[64,128,64]
+        if types !=None:
+            transform=types['transform']
+            feature_type=types['feature']
+            if transform=='concat':
+                in_feature=in_feature*5
+                hidden_sizes=[128,128,64]
+        else:
+            transform='pca'
+            feature_type='curve'
 
-        meta_train_dataset = KnobsDataset(dataset_type='train')
-        meta_val_dataset = KnobsDataset(dataset_type='val')
-        meta_test_dataset = KnobsDataset(dataset_type='test')
-
-
-        model = ModelMLPSinusoid(hidden_sizes=[80, 80])
+        meta_train_dataset = KnobsDataset(dataset_type='train',train_shot=num_shots, test_shot=num_shots_test, way=num_ways,transform=transform,feature_type=feature_type)
+        meta_val_dataset = KnobsDataset(dataset_type='val',train_shot=num_shots, test_shot=num_shots_test, way=num_ways,transform=transform,feature_type=feature_type)
+        meta_test_dataset = KnobsDataset(dataset_type='test',train_shot=num_shots, test_shot=num_shots_test, way=num_ways,transform=transform,feature_type=feature_type)
+        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         loss_function = F.mse_loss
 
     elif name == 'omniglot':

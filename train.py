@@ -33,12 +33,12 @@ def main(args):
             json.dump(vars(args), f, indent=2)
         logging.info('Saving configuration file in `{0}`'.format(
                      os.path.abspath(os.path.join(folder, 'config.json'))))
-
     writer = SummaryWriter(folder)
     benchmark = get_benchmark_by_name(args.dataset,
                                       args.num_ways,
                                       args.num_shots,
                                       args.num_shots_test,
+                                      types={'feature':args.feature,'transform':args.transform},
                                       hidden_size=args.hidden_size)
 
     meta_train_dataloader = DataLoader(benchmark.meta_train_dataset,
@@ -53,8 +53,10 @@ def main(args):
                                               pin_memory=True)
 
     meta_optimizer = torch.optim.Adam(benchmark.model.parameters(), lr=args.meta_lr)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=meta_optimizer, T_max=500,
-                                                          eta_min=0.00001)
+    scheduler=None
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=meta_optimizer, T_max=500,
+    #                                                       eta_min=0.00001)
+
     metalearner = ModelAgnosticMetaLearning(benchmark.model,
                                             meta_optimizer,
                                             first_order=args.first_order,
@@ -65,12 +67,12 @@ def main(args):
                                             device=device)
 
     best_value = None
-    first=True
+    first=False
     # Training loop
     epoch_desc = 'Epoch {{0: <{0}d}}'.format(1 + int(math.log10(args.num_epochs)))
     for epoch in range(args.num_epochs):
-        if epoch>=20:
-            first=False
+        # if epoch>=20:
+        #     first=False
         metalearner.train(meta_train_dataloader,
                           max_batches=args.num_batches,
                           verbose=args.verbose,
@@ -110,11 +112,11 @@ if __name__ == '__main__':
         help='Name of the dataset (default: omniglot).')
     parser.add_argument('--output-folder', type=str, default='results',
         help='Path to the output folder to save the model.')
-    parser.add_argument('--num-ways', type=int, default=16,
+    parser.add_argument('--num-ways', type=int, default=8,
         help='Number of classes per task (N in "N-way", default: 5).')
-    parser.add_argument('--num-shots', type=int, default=1,
+    parser.add_argument('--num-shots', type=int, default=2,
         help='Number of training example per class (k in "k-shot", default: 5).')
-    parser.add_argument('--num-shots-test', type=int, default=1,
+    parser.add_argument('--num-shots-test', type=int, default=2,
         help='Number of test example per class. If negative, same as the number '
         'of training examples `--num-shots` (default: 15).')
 
@@ -122,9 +124,13 @@ if __name__ == '__main__':
     parser.add_argument('--hidden-size', type=int, default=64,
         help='Number of channels in each convolution layer of the VGG network '
         '(default: 64).')
-
+    # Model knobs
+    parser.add_argument('--feature', type=str, default='curve',choices=['curve','iterval','knobs'],
+        help='what kind of feature extration')
+    parser.add_argument('--transform', type=str, default='pca',choices=['pca','concat'],
+        help='transform type')
     # Optimization
-    parser.add_argument('--batch-size', type=int, default=32,
+    parser.add_argument('--batch-size', type=int, default=16,
         help='Number of tasks in a batch of tasks (default: 25).')
     parser.add_argument('--num-steps', type=int, default=1,
         help='Number of fast adaptation steps, ie. gradient descent '
