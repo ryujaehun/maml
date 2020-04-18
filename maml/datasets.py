@@ -51,6 +51,10 @@ def get_benchmark_by_name(name,
             if transform=='concat':
                 in_feature=in_feature*5
                 hidden_sizes=[128,128,64]
+            elif feature_type=='knob':
+                in_feature=7
+                hidden_sizes=[32,64,64]
+                transform=None
         else:
             transform='pca'
             feature_type='curve'

@@ -113,11 +113,11 @@ if __name__ == '__main__':
         help='Name of the dataset (default: omniglot).')
     parser.add_argument('--output-folder', type=str, default='results',
         help='Path to the output folder to save the model.')
-    parser.add_argument('--num-ways', type=int, default=8,
+    parser.add_argument('--num-ways', type=int, default=12,
         help='Number of classes per task (N in "N-way", default: 5).')
-    parser.add_argument('--num-shots', type=int, default=2,
+    parser.add_argument('--num-shots', type=int, default=1,
         help='Number of training example per class (k in "k-shot", default: 5).')
-    parser.add_argument('--num-shots-test', type=int, default=2,
+    parser.add_argument('--num-shots-test', type=int, default=1,
         help='Number of test example per class. If negative, same as the number '
         'of training examples `--num-shots` (default: 15).')
 
@@ -126,7 +126,7 @@ if __name__ == '__main__':
         help='Number of channels in each convolution layer of the VGG network '
         '(default: 64).')
     # Model knobs
-    parser.add_argument('--feature', type=str, default='curve',choices=['curve','iterval','knobs'],
+    parser.add_argument('--feature', type=str, default='curve',choices=['curve','iterval','knob'],
         help='what kind of feature extration')
     parser.add_argument('--transform', type=str, default='concat',choices=['pca','concat'],
         help='transform type')

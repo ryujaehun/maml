@@ -17,6 +17,7 @@ def pca(data):
 
 def concat_pca(data,split=5):
     pca = PCA()
+    
     data=normalize(data,axis=0)
     idx=data.shape[1]//split
     temp=[]
@@ -52,6 +53,8 @@ class KnobsDataset(Dataset):
             self.transform = pca
         elif transform=='concat':
             self.transform = concat_pca
+        elif transform==None:
+            self.transform = None
         else :
             raise NotImplementedError
         self.train_shot = train_shot
