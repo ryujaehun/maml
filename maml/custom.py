@@ -25,7 +25,7 @@ def concat_pca(data,split=5):
     
         _pca = pca.fit_transform(_data)
         temp.append(_pca)
-    concat = np.vstack(temp)
+    concat = np.hstack(temp)
     return concat
 
 

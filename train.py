@@ -19,8 +19,9 @@ def main(args):
         if not os.path.exists(args.output_folder):
             os.makedirs(args.output_folder)
             logging.debug('Creating folder `{0}`'.format(args.output_folder))
-
-        folder = os.path.join(args.output_folder,
+        
+        folder=os.path.join(args.output_folder,'ways',str(args.num_ways),'shots',str(args.num_shots),'feature',args.feature,'transform',args.transform)
+        folder = os.path.join(folder,
                               time.strftime('%Y-%m-%d_%H%M%S'))
         os.makedirs(folder)
         logging.debug('Creating folder `{0}`'.format(folder))
@@ -127,7 +128,7 @@ if __name__ == '__main__':
     # Model knobs
     parser.add_argument('--feature', type=str, default='curve',choices=['curve','iterval','knobs'],
         help='what kind of feature extration')
-    parser.add_argument('--transform', type=str, default='pca',choices=['pca','concat'],
+    parser.add_argument('--transform', type=str, default='concat',choices=['pca','concat'],
         help='transform type')
     # Optimization
     parser.add_argument('--batch-size', type=int, default=16,
@@ -161,3 +162,4 @@ if __name__ == '__main__':
         args.num_shots_test = args.num_shots
 
     main(args)
+
