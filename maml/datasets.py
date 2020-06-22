@@ -5,7 +5,7 @@ from torchmeta.datasets import Omniglot, MiniImagenet
 from torchmeta.toy import Sinusoid
 from torchmeta.transforms import ClassSplitter, Categorical, Rotation
 from torchvision.transforms import ToTensor, Resize, Compose
-from .custom import KnobsDataset
+from .custom import KnobsDataset,TaskDataset
 from maml.model import ModelConvOmniglot, ModelConvMiniImagenet, ModelMLPSinusoid,MetaMLPModel
 from maml.utils import ToTensor1D
 
@@ -64,6 +64,17 @@ def get_benchmark_by_name(name,
         meta_test_dataset = KnobsDataset(dataset_type='test',train_shot=num_shots, test_shot=num_shots_test, way=num_ways,transform=transform,feature_type=feature_type)
         model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         loss_function = F.mse_loss
+
+
+    elif name == 'task':
+        transform=types['transform']
+        in_feature=720
+        hidden_sizes=[64,64,64,64]
+        meta_train_dataset = TaskDataset(transform=transform)
+        meta_val_dataset = TaskDataset(transform=transform)
+        meta_test_dataset= TaskDataset(transform=transform)
+        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
+        loss_function = F.smooth_l1_loss
 
     elif name == 'omniglot':
         class_augmentations = [Rotation([90, 180, 270])]

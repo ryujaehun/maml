@@ -19,8 +19,23 @@ def main(args):
         if not os.path.exists(args.output_folder):
             os.makedirs(args.output_folder)
             logging.debug('Creating folder `{0}`'.format(args.output_folder))
-        
-        folder=os.path.join(args.output_folder,'ways',str(args.num_ways),'shots',str(args.num_shots),'feature',args.feature,'transform',args.transform)
+        print(args.transform)
+        if args.transform==0:
+            transform='Power'
+        elif args.transform == 1:
+            transform='Standard'
+        elif args.transform == 2:
+            transform='MinMax'
+        elif args.transform == 3:
+            transform='Quantile'
+        elif args.transform == 4:
+            transform='Normal'
+        elif args.transform == 5:
+            transform='Robust'
+        else:
+            raise('transform error')
+            transform=0
+        folder=os.path.join(args.output_folder,transform,'ways',str(args.num_ways),'shots',str(args.num_shots))
         folder = os.path.join(folder,
                               time.strftime('%Y-%m-%d_%H%M%S'))
         os.makedirs(folder)
@@ -55,8 +70,6 @@ def main(args):
 
     meta_optimizer = torch.optim.Adam(benchmark.model.parameters(), lr=args.meta_lr)
     scheduler=None
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer=meta_optimizer, T_max=500,
-    #                                                       eta_min=0.00001)
 
     metalearner = ModelAgnosticMetaLearning(benchmark.model,
                                             meta_optimizer,
@@ -72,8 +85,6 @@ def main(args):
     # Training loop
     epoch_desc = 'Epoch {{0: <{0}d}}'.format(1 + int(math.log10(args.num_epochs)))
     for epoch in range(args.num_epochs):
-        # if epoch>=20:
-        #     first=False
         metalearner.train(meta_train_dataloader,
                           max_batches=args.num_batches,
                           verbose=args.verbose,
@@ -109,15 +120,15 @@ if __name__ == '__main__':
     # General
 
     parser.add_argument('--dataset', type=str,
-        choices=['sinusoid', 'omniglot', 'miniimagenet','knobs'], default='sinusoid',
+        choices=['sinusoid', 'omniglot', 'miniimagenet','knobs','task'], default='task',
         help='Name of the dataset (default: omniglot).')
     parser.add_argument('--output-folder', type=str, default='results',
         help='Path to the output folder to save the model.')
-    parser.add_argument('--num-ways', type=int, default=12,
+    parser.add_argument('--num-ways', type=int, default=4,
         help='Number of classes per task (N in "N-way", default: 5).')
-    parser.add_argument('--num-shots', type=int, default=1,
+    parser.add_argument('--num-shots', type=int, default=5,
         help='Number of training example per class (k in "k-shot", default: 5).')
-    parser.add_argument('--num-shots-test', type=int, default=1,
+    parser.add_argument('--num-shots-test', type=int, default=5,
         help='Number of test example per class. If negative, same as the number '
         'of training examples `--num-shots` (default: 15).')
 
@@ -128,7 +139,7 @@ if __name__ == '__main__':
     # Model knobs
     parser.add_argument('--feature', type=str, default='curve',choices=['curve','iterval','knob'],
         help='what kind of feature extration')
-    parser.add_argument('--transform', type=str, default='concat',choices=['pca','concat'],
+    parser.add_argument('--transform', type=int, default='concat',
         help='transform type')
     # Optimization
     parser.add_argument('--batch-size', type=int, default=16,

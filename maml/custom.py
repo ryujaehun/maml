@@ -5,7 +5,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import normalize
+from sklearn.preprocessing import normalize, MinMaxScaler
+from sklearn import preprocessing
 warnings.filterwarnings("ignore")
 
 
@@ -143,6 +144,83 @@ class KnobsDataset(Dataset):
         batch['train'] = (train_data, train_labels)
         batch['test'] = (test_data, test_labels)
         return batch
+
+
+class TaskDataset(Dataset):
+    def __init__(self, ways=5, shot=5, test_shot=5, size=10000000, transform=None):
+        self.size = size
+        self.shot = shot
+        self.ways = ways
+        self.test_shot = test_shot
+        self.transform=transform
+        path = [i for i in glob.glob('dataset/*/*/*') if os.path.isdir(i)]
+        self.cost_path = list(map(lambda x: os.path.join(x, 'cost.npy'), path))
+        self.curve_path = list(map(lambda x: os.path.join(x, 'curve.npy'), path))
+        self._curve = []
+        for curve in self.curve_path:
+            self._curve.append(np.load(curve)[:, :720])
+        self._cost = []
+        for cost in self.cost_path:
+            np_cost = np.load(cost)
+            self._cost.append(np_cost)
+        if transform == 0:
+            self._scaler=preprocessing.PowerTransformer(method='box-cox')
+        elif transform == 1:
+            self._scaler=preprocessing.StandardScaler()
+        elif transform == 2:
+            self._scaler=preprocessing.MinMaxScaler()
+        elif transform == 3:
+            self._scaler=preprocessing.QuantileTransformer(output_distribution='uniform')
+        elif transform == 4:
+            self._scaler=preprocessing.Normalizer()
+        elif transform == 5:
+            self._scaler=preprocessing.RobustScaler()
+    def __len__(self):
+        return 149891 * self.shot
+
+    def __getitem__(self, idx):
+        batch = dict()
+        flag = True
+        while flag:
+            ways = np.random.randint(0, len(self._cost), self.ways)
+            candidate_cost = np.take(self._cost, ways)
+            candidate_curve = np.take(self._curve, ways)
+
+            if min(map(lambda x: len(x), candidate_cost)) > max(self.shot, self.test_shot):
+                flag = False
+                # shot 크기 보다 작은 way를 선택하지 않음
+            train_data = []
+            train_label = []
+
+            test_data = []
+            test_label = []
+
+            for curve, cost in zip(candidate_curve, candidate_cost):
+                # shot 에 맞춰서 배치에 넣음
+                train_shots = np.random.randint(0, len(curve), self.shot)
+                train_data.append(np.take(curve, train_shots, axis=0))
+                train_label.append(np.take(cost, train_shots, axis=0))
+
+                test_shots = np.random.randint(0, len(curve), self.test_shot)
+                test_data.append(np.take(curve, test_shots, axis=0))
+                test_label.append(np.take(cost, test_shots, axis=0))
+            
+            train_data = torch.tensor(np.stack(train_data), dtype=torch.float32)
+            if self.transform==4:
+                train_label = torch.tensor(self._scaler.fit_transform(np.stack(train_label).T).T, dtype=torch.float32)
+            else:
+                train_label = torch.tensor(self._scaler.fit_transform(np.stack(train_label)), dtype=torch.float32)
+
+            test_data = torch.tensor(np.stack(test_data), dtype=torch.float32)
+            if self.transform==4:
+                test_label = torch.tensor(self._scaler.fit_transform(np.stack(test_label).T).T, dtype=torch.float32)
+            else:
+                test_label = torch.tensor(self._scaler.fit_transform(np.stack(test_label)), dtype=torch.float32)
+
+            batch['train'] = (train_data, train_label)
+            batch['test'] = (test_data, test_label)
+        return batch
+
 if __name__ == "__main__":
     t = KnobsDataset()
     import torch
