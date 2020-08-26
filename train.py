@@ -20,7 +20,7 @@ def main(args):
             os.makedirs(args.output_folder)
             logging.debug('Creating folder `{0}`'.format(args.output_folder))
         print(args.transform)
-        folder=os.path.join(args.output_folder,args.feature,'ways',str(args.num_ways),'shots',str(args.num_shots))
+        folder=os.path.join(args.output_folder,args.feature,'ways',str(args.num_ways),'shots',str(args.num_shots),'adapt',str(args.num_steps))
         folder = os.path.join(folder,
                               time.strftime('%Y-%m-%d_%H%M%S'))
         os.makedirs(folder)
