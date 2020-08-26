@@ -20,22 +20,7 @@ def main(args):
             os.makedirs(args.output_folder)
             logging.debug('Creating folder `{0}`'.format(args.output_folder))
         print(args.transform)
-        if args.transform==0:
-            transform='Power'
-        elif args.transform == 1:
-            transform='Standard'
-        elif args.transform == 2:
-            transform='MinMax'
-        elif args.transform == 3:
-            transform='Quantile'
-        elif args.transform == 4:
-            transform='Normal'
-        elif args.transform == 5:
-            transform='Robust'
-        else:
-            raise('transform error')
-            transform=0
-        folder=os.path.join(args.output_folder,transform,'ways',str(args.num_ways),'shots',str(args.num_shots))
+        folder=os.path.join(args.output_folder,args.feature,'ways',str(args.num_ways),'shots',str(args.num_shots))
         folder = os.path.join(folder,
                               time.strftime('%Y-%m-%d_%H%M%S'))
         os.makedirs(folder)
@@ -120,11 +105,11 @@ if __name__ == '__main__':
     # General
 
     parser.add_argument('--dataset', type=str,
-        choices=['sinusoid', 'omniglot', 'miniimagenet','knobs','task'], default='task',
+ default='graph',
         help='Name of the dataset (default: omniglot).')
     parser.add_argument('--output-folder', type=str, default='results',
         help='Path to the output folder to save the model.')
-    parser.add_argument('--num-ways', type=int, default=4,
+    parser.add_argument('--num-ways', type=int, default=3,
         help='Number of classes per task (N in "N-way", default: 5).')
     parser.add_argument('--num-shots', type=int, default=5,
         help='Number of training example per class (k in "k-shot", default: 5).')
@@ -137,9 +122,9 @@ if __name__ == '__main__':
         help='Number of channels in each convolution layer of the VGG network '
         '(default: 64).')
     # Model knobs
-    parser.add_argument('--feature', type=str, default='curve',choices=['curve','iterval','knob'],
+    parser.add_argument('--feature', type=str, default='graph',
         help='what kind of feature extration')
-    parser.add_argument('--transform', type=int, default='concat',
+    parser.add_argument('--transform', default=None,
         help='transform type')
     # Optimization
     parser.add_argument('--batch-size', type=int, default=16,
@@ -151,7 +136,7 @@ if __name__ == '__main__':
         help='Number of epochs of meta-training (default: 50).')
     parser.add_argument('--num-batches', type=int, default=100,
         help='Number of batch of tasks per epoch (default: 100).')
-    parser.add_argument('--step-size', type=float, default=1e-2,
+    parser.add_argument('--step-size', type=float, default=2e-3,
         help='Size of the fast adaptation step, ie. learning rate in the '
         'gradient descent update (default: 0.1).')
     parser.add_argument('--first-order', action='store_true',
