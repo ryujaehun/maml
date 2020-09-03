@@ -8,47 +8,52 @@ from maml.datasets import get_benchmark_by_name
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
+from maml.model import MetaMLPModel
 
 
 
 class Conv2dDataset(Dataset):
-    def __init__(self,order=None):
-
-        self.__save_path='/home/jaehun/workspace/pytorch-maml/GCN'
-        if order == None:
-            self.__cost_path = os.path.join(self.__save_path,'conv2d','label.npy')
-            self.__feature_path = os.path.join(self.__save_path,'conv2d','batch_1.npy')
+    def __init__(self,kind='template'):
+        if kind=='curve':
+            self.__feature_path = '/home/jaehun/workspace/incubator-tvm/kernel/dataset/new_graph_dataset_small/conv2d/curves.npy'
+            self.__flops_path = '/home/jaehun/workspace/incubator-tvm/kernel/dataset/new_graph_dataset_small/conv2d/flops.npy'
+            self.__cost_path = '/home/jaehun/workspace/incubator-tvm/kernel/dataset/new_graph_dataset_small/conv2d/costs.npy'
+            self.__flops = np.load(self.__flops_path).astype(float)
+            self.__costs = np.load(self.__cost_path).astype(float)
+            np_max = np.max(self.__flops)
+            self.__flops/=np_max
+            self.__costs /= 1e-3
+            self.__features = np.load(self.__feature_path).astype(float)
+            self.__costs=np.vstack((self.__costs,self.__flops)).T
         else:
-            self.__cost_path = os.path.join(self.__save_path, 'conv2d', 'new_label.npy')
-            self.__feature_path = os.path.join(self.__save_path, 'conv2d', 'new_batch_1.npy')
-        self.__costs=np.load(self.__cost_path).squeeze()
-        if order==None:
-            self.__costs=self.__costs[:,1:]
-        self.__features=np.load(self.__feature_path).squeeze()
+            self.__save_path='/home/jaehun/workspace/incubator-tvm/result/GCN_template'
+            self.__cost_path = os.path.join(self.__save_path,'conv2d',kind,'label.npy')
+            self.__feature_path = os.path.join(self.__save_path,'conv2d',kind,'batch_1.npy')
+            self.__costs = np.load(self.__cost_path).squeeze()
+            self.__features=np.load(self.__feature_path).squeeze()
+        self.__costs=torch.tensor(self.__costs,dtype=torch.float32)
+        self.__features = torch.tensor(self.__features, dtype=torch.float32)
     def __len__(self):
         return len(self.__costs)
     def __getitem__(self, idx):
         return self.__features[idx],self.__costs[idx]
 if __name__=='__main__':
     device = torch.device('cuda')
-    for id,pp in enumerate(['graph_flops','graph_flops_order']):
-        paths=glob.glob('results/graph_flops/**/config.json',recursive=True)
-        if id==1:
-            conv2d_dataset=Conv2dDataset(order=True)
+    kinds=['curve','template','non-template']
+    for kind in kinds:
+        path=f'results/{kind}/baseline'
+        os.makedirs(path,exist_ok=True)
+        conv2d_dataset=Conv2dDataset(kind=kind)
+        if kind=='curve':
+            model=MetaMLPModel(480,2,[128,128,64]).to(device)
         else:
-            conv2d_dataset = Conv2dDataset()
-
-        benchmark = get_benchmark_by_name(pp,
-                                          10,
-                                          10,
-                                          10,
-                                          )
+            model = MetaMLPModel(128, 2, [128, 128, 64]).to(device)
         dataset_loader = DataLoader(conv2d_dataset,
                                     batch_size=128, shuffle=True,
-                                    num_workers=1)
-        model = benchmark.model.to(device)
+                                    num_workers=4)
+        model = model.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=2e-3)
-        for epoch in range(1, 50 + 1):
+        for epoch in range(1, 75 + 1):
             for idx, (data, label) in enumerate(dataset_loader):
                 data = data.to(device)
                 label = label.to(device)
@@ -58,4 +63,4 @@ if __name__=='__main__':
                 loss.backward()
                 optimizer.step()
             print(epoch,loss.detach().item())
-        torch.save(model.state_dict(),f'{pp}.pth')
+        torch.save(model.state_dict(),f'{path}/model.pth')
