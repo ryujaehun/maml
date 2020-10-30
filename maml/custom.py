@@ -204,11 +204,11 @@ class GraphDataset(Dataset):
         self.shot = shot
         self.ways = ways
         self.test_shot = test_shot
-        self.__save_path='/home/jaehun/workspace/incubator-tvm/result/GCN_template'
+        self.__save_path='/home/jaehun/workspace/incubator-tvm/result/GCN_new_template'
         self.transform=transform
-        self.__tasks = ('conv1d', 'conv1d_transpose',  'conv2d_transpose')
+        self.__tasks = ('conv1d', 'conv1d_transpose', 'conv2d','conv2d_winograd', 'conv2d_transpose')
         if val:
-            self.__tasks = ['conv2d',]
+            self.__tasks = ['conv2d','conv2d_winograd']
         if template:
             self.__cost_path = list(map(lambda x: os.path.join(self.__save_path,x,'template','label.npy'), self.__tasks))
             self.__feature_path = list(map(lambda x: os.path.join(self.__save_path,x,'template','batch_1.npy'), self.__tasks))
@@ -223,7 +223,6 @@ class GraphDataset(Dataset):
             _cost.append(np.load(cost))
         self.__features=np.vstack(_feature).squeeze()
         self.__costs=np.vstack(_cost).squeeze()
-        print(np.max(self.__costs))
         self.__n_task=int(np.ceil(len(self.__costs)/100))
         self.__cost_len=len(self.__costs)
     def __len__(self):

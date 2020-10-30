@@ -72,7 +72,7 @@ def get_benchmark_by_name(name,
         meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=True)
         meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=True)
         meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=True)
-        model = MetaMLPModel(in_feature, 2, hidden_sizes=hidden_sizes)
+        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         loss_function = F.smooth_l1_loss
 
     elif name == 'graph_non-template':
@@ -81,7 +81,7 @@ def get_benchmark_by_name(name,
         meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=False)
         meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
         meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-        model = MetaMLPModel(in_feature, 2, hidden_sizes=hidden_sizes)
+        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         loss_function = F.smooth_l1_loss
 
     elif name == 'conv2d_graph_non-template':

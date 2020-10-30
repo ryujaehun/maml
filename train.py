@@ -147,7 +147,7 @@ if __name__ == '__main__':
         'loss). The default optimizer is Adam (default: 1e-3).')
 
     # Misc
-    parser.add_argument('--num-workers', type=int, default=1,
+    parser.add_argument('--num-workers', type=int, default=8,
         help='Number of workers to use for data-loading (default: 1).')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--use-cuda', action='store_true')
