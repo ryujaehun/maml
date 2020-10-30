@@ -5,7 +5,7 @@ from torchmeta.datasets import Omniglot, MiniImagenet
 from torchmeta.toy import Sinusoid
 from torchmeta.transforms import ClassSplitter, Categorical, Rotation
 from torchvision.transforms import ToTensor, Resize, Compose
-from .custom import GraphDataset
+from .custom import GraphDataset,GraphBatchDataset
 from maml.model import ModelConvOmniglot, ModelConvMiniImagenet, ModelMLPSinusoid,MetaMLPModel
 from maml.utils import ToTensor1D
 
@@ -42,25 +42,61 @@ def get_benchmark_by_name(name,
 
         model = ModelMLPSinusoid(hidden_sizes=[64, 64])
         loss_function = F.mse_loss
+    elif 'graph' in name:
+        # i.g. input graph_template_32_sample
+        # input graph_template_32_sample
+        # input batch-graph_non-template_128_sample
+        # input batch-graph_template_64_full
 
-    elif name == 'graph_template':
-        in_feature=128
-        hidden_sizes=[128,128,64]
-
-        meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=True)
-        meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=True)
-        meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=True)
-        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
+        graph,template,feature_size,sample=name.split('_')
+        in_feature=int(feature_size)
+        if template=='template':
+            template=True
+        elif template=='non-template':
+            template=False
+        else:
+            raise ('only template and non-tenplate is permited.')
+        if in_feature==128:
+            hidden_sizes=[128,128,64]
+        elif in_feature==64:
+            hidden_sizes = [64, 64, 32]
+        elif in_feature == 32:
+            hidden_sizes = [64, 32]
+        else:
+            raise ('only 32,64,128 are permited ')
+        if sample=='sample':
+            sample=True
+        elif sample=='full':
+            sample = False
+        else:
+            raise ("only sample and full are permited")
+        if graph == 'graph':
+            meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=template)
+            meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=template)
+            meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=template)
+            model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
+        elif graph == 'batch-graph':
+            meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
+                                              template=template,sample=sample,feature_size=feature_size)
+            meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+                                            template=template,sample=sample,feature_size=feature_size)
+            meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+                                             template=template,sample=sample,feature_size=feature_size)
+            model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
+        else:
+            raise ('only graph and batch-graph are implemented.')
         loss_function = F.smooth_l1_loss
 
-    elif name == 'graph_non-template':
-        in_feature=128
-        hidden_sizes=[128,128,64]
-        meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=False)
-        meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-        meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
-        loss_function = F.smooth_l1_loss
+
+
+    # elif name == 'graph_non-template':
+    #     in_feature=128
+    #     hidden_sizes=[128,128,64]
+    #     meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=False)
+    #     meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
+    #     meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
+    #     model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
+    #     loss_function = F.smooth_l1_loss
 
 
 
