@@ -5,7 +5,7 @@ from torchmeta.datasets import Omniglot, MiniImagenet
 from torchmeta.toy import Sinusoid
 from torchmeta.transforms import ClassSplitter, Categorical, Rotation
 from torchvision.transforms import ToTensor, Resize, Compose
-from .custom import GraphDataset,CurveDataset,Conv2dGraphDataset,Conv2d_2_GraphDataset
+from .custom import GraphDataset
 from maml.model import ModelConvOmniglot, ModelConvMiniImagenet, ModelMLPSinusoid,MetaMLPModel
 from maml.utils import ToTensor1D
 
@@ -42,28 +42,6 @@ def get_benchmark_by_name(name,
 
         model = ModelMLPSinusoid(hidden_sizes=[64, 64])
         loss_function = F.mse_loss
-    # elif name == 'knobs':
-    #     in_feature=num_shots*num_ways
-    #     hidden_sizes=[64,128,64]
-    #     if types !=None:
-    #         transform=types['transform']
-    #         feature_type=types['feature']
-    #         if transform=='concat':
-    #             in_feature=in_feature*5
-    #             hidden_sizes=[128,128,64]
-    #         elif feature_type=='knob':
-    #             in_feature=7
-    #             hidden_sizes=[32,64,64]
-    #             transform=None
-    #     else:
-    #         transform='pca'
-    #         feature_type='curve'
-
-    #     meta_train_dataset = KnobsDataset(dataset_type='train',train_shot=num_shots, test_shot=num_shots_test, way=num_ways,transform=transform,feature_type=feature_type)
-    #     meta_val_dataset = KnobsDataset(dataset_type='val',train_shot=num_shots, test_shot=num_shots_test, way=num_ways,transform=transform,feature_type=feature_type)
-    #     meta_test_dataset = KnobsDataset(dataset_type='test',train_shot=num_shots, test_shot=num_shots_test, way=num_ways,transform=transform,feature_type=feature_type)
-    #     model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
-    #     loss_function = F.mse_loss
 
     elif name == 'graph_template':
         in_feature=128
@@ -84,32 +62,6 @@ def get_benchmark_by_name(name,
         model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         loss_function = F.smooth_l1_loss
 
-    elif name == 'conv2d_graph_non-template':
-        in_feature=128
-        hidden_sizes=[128,128,64]
-        meta_train_dataset = Conv2dGraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=False)
-        meta_val_dataset = Conv2dGraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-        meta_test_dataset = Conv2dGraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
-        loss_function = F.smooth_l1_loss
-
-    elif name == 'conv2d_2_graph_non-template':
-        in_feature=128
-        hidden_sizes=[128,128,64]
-        meta_train_dataset = Conv2d_2_GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=False)
-        meta_val_dataset = Conv2d_2_GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-        meta_test_dataset = Conv2d_2_GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-        model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
-        loss_function = F.smooth_l1_loss
-
-    elif name == 'curve':
-        in_feature=480
-        hidden_sizes=[128,128,64]
-        meta_train_dataset = Conv2d_2_GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False)
-        meta_val_dataset = Conv2d_2_GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True)
-        meta_test_dataset = Conv2d_2_GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True)
-        model = MetaMLPModel(in_feature, 2, hidden_sizes=hidden_sizes)
-        loss_function = F.smooth_l1_loss
 
 
     elif name == 'omniglot':
