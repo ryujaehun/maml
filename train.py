@@ -20,10 +20,10 @@ def main(args):
             os.makedirs(args.output_folder)
             logging.debug('Creating folder `{0}`'.format(args.output_folder))
         print(args.transform)
-        folder=os.path.join(args.output_folder,args.feature,'ways',str(args.num_ways),'shots',str(args.num_shots),'adapt',str(args.num_steps))
-        folder = os.path.join(folder,
-                              time.strftime('%Y-%m-%d_%H%M%S'))
-        os.makedirs(folder)
+        folder=os.path.join('/root/maml/',args.output_folder,args.feature,'ways',str(args.num_ways),'shots',str(args.num_shots),'adapt',str(args.num_steps))
+        # folder = os.path.join(folder,
+        #                       time.strftime('%Y-%m-%d_%H%M%S'))
+        os.makedirs(folder,exist_ok=True)
         logging.debug('Creating folder `{0}`'.format(folder))
 
 
@@ -39,8 +39,7 @@ def main(args):
                                       args.num_ways,
                                       args.num_shots,
                                       args.num_shots_test,
-                                      types={'feature':args.feature,'transform':args.transform},
-                                      hidden_size=args.hidden_size)
+                                  )
 
     meta_train_dataloader = DataLoader(benchmark.meta_train_dataset,
                                                 batch_size=args.batch_size,
@@ -54,7 +53,6 @@ def main(args):
                                               pin_memory=True)
 
     meta_optimizer = torch.optim.Adam(benchmark.model.parameters(), lr=args.meta_lr)
-    scheduler=None
 
     metalearner = ModelAgnosticMetaLearning(benchmark.model,
                                             meta_optimizer,
@@ -62,7 +60,7 @@ def main(args):
                                             num_adaptation_steps=args.num_steps,
                                             step_size=args.step_size,
                                             loss_function=benchmark.loss_function,
-                                            scheduler=scheduler,
+                                            scheduler=None,
                                             device=device)
 
     best_value = None

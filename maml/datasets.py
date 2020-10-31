@@ -16,7 +16,7 @@ def get_benchmark_by_name(name,
                           num_shots,
                           num_shots_test,
                           hidden_size=None,
-                          types=None
+                          args=None
                           ):
     dataset_transform = ClassSplitter(shuffle=True,
                                       num_train_per_class=num_shots,
@@ -71,16 +71,16 @@ def get_benchmark_by_name(name,
         else:
             raise ("only sample and full are permited")
         if graph == 'graph':
-            meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=template)
-            meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=template)
-            meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=template)
+            meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=template,sample=sample,feature_size=feature_size)
+            meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=template,sample=sample,feature_size=feature_size)
+            meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=template,sample=sample,feature_size=feature_size)
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         elif graph == 'batch-graph':
-            meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
+            meta_train_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
                                               template=template,sample=sample,feature_size=feature_size)
-            meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+            meta_val_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
                                             template=template,sample=sample,feature_size=feature_size)
-            meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+            meta_test_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
                                              template=template,sample=sample,feature_size=feature_size)
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         else:
@@ -89,14 +89,6 @@ def get_benchmark_by_name(name,
 
 
 
-    # elif name == 'graph_non-template':
-    #     in_feature=128
-    #     hidden_sizes=[128,128,64]
-    #     meta_train_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=False,template=False)
-    #     meta_val_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-    #     meta_test_dataset = GraphDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways,val=True,template=False)
-    #     model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
-    #     loss_function = F.smooth_l1_loss
 
 
 
