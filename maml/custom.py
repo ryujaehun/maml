@@ -143,7 +143,7 @@ class GraphBatchDataset(Dataset):
 
 
 class Conv2dGraphBatchDataset(Dataset):
-    def __init__(self, ways=5, shot=5, test_shot=5, size=10000000, transform=None, val=False,tasks=('conv1d', 'conv1d_transpose', 'conv2d', 'conv2d_winograd', 'conv2d_transpose') ,template=False,sample=False,feature_size=128):
+    def __init__(self, ways=5, shot=5, test_shot=5, size=10000000, transform=None, val=False,tasks=( 'conv2d', 'conv2d_winograd') ,template=False,sample=False,feature_size=128):
         self.shot = shot
         self.ways = ways
         self.test_shot = test_shot
@@ -165,7 +165,7 @@ class Conv2dGraphBatchDataset(Dataset):
         paths=[]
         for p in self.__tasks:
             if 'conv2d' in p :
-                glob.glob(os.path.join(path_prefix, 'new_data', p, '*_[0-9]', '[0-9]*'))
+                paths.extend(glob.glob(os.path.join(path_prefix, 'new_data', p, '*_[0-9]', '[0-9]*')))
             else:
                 paths.extend(glob.glob(os.path.join(path_prefix, 'new_data', p, '*', '[0-9]*')))
 
