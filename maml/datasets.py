@@ -5,7 +5,7 @@ from torchmeta.datasets import Omniglot, MiniImagenet
 from torchmeta.toy import Sinusoid
 from torchmeta.transforms import ClassSplitter, Categorical, Rotation
 from torchvision.transforms import ToTensor, Resize, Compose
-from .custom import GraphDataset,GraphBatchDataset
+from .custom import GraphDataset,GraphBatchDataset,Conv2dGraphBatchDataset
 from maml.model import ModelConvOmniglot, ModelConvMiniImagenet, ModelMLPSinusoid,MetaMLPModel
 from maml.utils import ToTensor1D
 
@@ -94,11 +94,11 @@ def get_benchmark_by_name(name,
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         elif graph == 'conv2d-graph':
             # small conv2d
-            meta_train_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
+            meta_train_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
                                               template=template,sample=sample,feature_size=feature_size)
-            meta_val_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+            meta_val_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
                                             template=template,sample=sample,feature_size=feature_size)
-            meta_test_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+            meta_test_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
                                              template=template,sample=sample,feature_size=feature_size)
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         else:
