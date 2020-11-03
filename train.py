@@ -125,14 +125,14 @@ if __name__ == '__main__':
     parser.add_argument('--transform', default=None,
         help='transform type')
     # Optimization
-    parser.add_argument('--batch-size', type=int, default=64,
+    parser.add_argument('--batch-size', type=int, default=32,
         help='Number of tasks in a batch of tasks (default: 25).')
     parser.add_argument('--num-steps', type=int, default=1,
         help='Number of fast adaptation steps, ie. gradient descent '
         'updates (default: 1).')
-    parser.add_argument('--num-epochs', type=int, default=75,
+    parser.add_argument('--num-epochs', type=int, default=50,
         help='Number of epochs of meta-training (default: 50).')
-    parser.add_argument('--num-batches', type=int, default=100,
+    parser.add_argument('--num-batches', type=int, default=256,
         help='Number of batch of tasks per epoch (default: 100).')
     parser.add_argument('--step-size', type=float, default=2e-3,
         help='Size of the fast adaptation step, ie. learning rate in the '
