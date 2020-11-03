@@ -85,21 +85,21 @@ def get_benchmark_by_name(name,
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         elif graph == 'conv1d-graph':
             # only conv1d
-            meta_train_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
-                                              tasks=('conv1d', 'conv1d_transpose'),template=template,sample=sample,feature_size=feature_size)
-            meta_val_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
-                                            tasks=('conv1d', 'conv1d_transpose'),template=template,sample=sample,feature_size=feature_size)
-            meta_test_dataset = GraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
-                                             tasks=('conv1d', 'conv1d_transpose'),template=template,sample=sample,feature_size=feature_size)
+            meta_train_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
+                                              tasks='conv1d_mix',template=template,sample=sample,feature_size=feature_size)
+            meta_val_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+                                            tasks='conv1d_mix',template=template,sample=sample,feature_size=feature_size)
+            meta_test_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
+                                             tasks='conv1d_mix',template=template,sample=sample,feature_size=feature_size)
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         elif graph == 'conv2d-graph':
             # small conv2d
             meta_train_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
-                                              template=template,sample=sample,feature_size=feature_size)
+                                              tasks='conv2d_mix',template=template,sample=sample,feature_size=feature_size)
             meta_val_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
-                                            template=template,sample=sample,feature_size=feature_size)
+                                            tasks='conv2d_mix',template=template,sample=sample,feature_size=feature_size)
             meta_test_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
-                                             template=template,sample=sample,feature_size=feature_size)
+                                             tasks='conv2d_mix',template=template,sample=sample,feature_size=feature_size)
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         else:
             raise ('only graph and batch-graph are implemented.')

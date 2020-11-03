@@ -143,7 +143,7 @@ class GraphBatchDataset(Dataset):
 
 
 class Conv2dGraphBatchDataset(Dataset):
-    def __init__(self, ways=5, shot=5, test_shot=5, size=10000000, transform=None, val=False,tasks=( 'conv2d', 'conv2d_winograd') ,template=False,sample=False,feature_size=128):
+    def __init__(self, ways=5, shot=5, test_shot=5, size=10000000, transform=None, val=False,tasks='conv2d_mix' ,template=False,sample=False,feature_size=128):
         self.shot = shot
         self.ways = ways
         self.test_shot = test_shot
@@ -153,7 +153,7 @@ class Conv2dGraphBatchDataset(Dataset):
         if val:
             self.__tasks = ['conv2d', 'conv2d_winograd','conv2d_transpose']
 
-        path = os.path.join(self.__save_path, 'all')
+        path = os.path.join(self.__save_path, f'{tasks}')
         if template:
             path_prefix = os.path.join(path, f'template/{feature_size}')
         else:
@@ -162,12 +162,7 @@ class Conv2dGraphBatchDataset(Dataset):
             path_prefix = os.path.join(path_prefix, 'sample')
         else:
             path_prefix = os.path.join(path_prefix, 'full')
-        paths=[]
-        for p in self.__tasks:
-            if 'conv2d' in p :
-                paths.extend(glob.glob(os.path.join(path_prefix, 'new_data', p, '*_[0-9]', '[0-9]*')))
-            else:
-                paths.extend(glob.glob(os.path.join(path_prefix, 'new_data', p, '*', '[0-9]*')))
+        paths=glob.glob(os.path.join(path_prefix, 'new_data', p, '*', '[0-9]*'))
 
         self.__cost_path = list(map(lambda x: os.path.join( x, 'label.npy'), paths))
         self.__feature_path = list(map(lambda x: os.path.join( x, 'batch_1.npy'), paths))
