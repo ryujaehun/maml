@@ -88,9 +88,9 @@ def get_benchmark_by_name(name,
             meta_train_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=False,
                                               tasks='conv1d_mix',template=template,sample=sample,feature_size=feature_size)
             meta_val_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
-                                            tasks='conv1d_mix',template=template,sample=sample,feature_size=feature_size)
+                                            tasks='conv2d_mix',template=template,sample=sample,feature_size=feature_size)
             meta_test_dataset = Conv2dGraphBatchDataset(shot=num_shots, test_shot=num_shots_test, ways=num_ways, val=True,
-                                             tasks='conv1d_mix',template=template,sample=sample,feature_size=feature_size)
+                                             tasks='conv2d_mix',template=template,sample=sample,feature_size=feature_size)
             model = MetaMLPModel(in_feature, 1, hidden_sizes=hidden_sizes)
         elif graph == 'conv2d-graph':
             # small conv2d

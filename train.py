@@ -125,7 +125,7 @@ if __name__ == '__main__':
     parser.add_argument('--transform', default=None,
         help='transform type')
     # Optimization
-    parser.add_argument('--batch-size', type=int, default=16,
+    parser.add_argument('--batch-size', type=int, default=64,
         help='Number of tasks in a batch of tasks (default: 25).')
     parser.add_argument('--num-steps', type=int, default=1,
         help='Number of fast adaptation steps, ie. gradient descent '
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         'loss). The default optimizer is Adam (default: 1e-3).')
 
     # Misc
-    parser.add_argument('--num-workers', type=int, default=8,
+    parser.add_argument('--num-workers', type=int, default=1,
         help='Number of workers to use for data-loading (default: 1).')
     parser.add_argument('--verbose', action='store_true')
     parser.add_argument('--use-cuda', action='store_true')

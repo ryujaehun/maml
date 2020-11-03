@@ -162,13 +162,22 @@ class Conv2dGraphBatchDataset(Dataset):
             path_prefix = os.path.join(path_prefix, 'sample')
         else:
             path_prefix = os.path.join(path_prefix, 'full')
-        paths=glob.glob(os.path.join(path_prefix, 'new_data', p, '*', '[0-9]*'))
+        if val:
+            paths=[]
+            for p in self.__tasks:
+                paths.extend(glob.glob(os.path.join(path_prefix, 'new_data', p, '*', '[0-9]*')))
+        else:
+            if tasks=='conv2d_mix':
+                paths=glob.glob(os.path.join(path_prefix, 'new_data', '*', '*_[0-9]', '[0-9]*'),recursive=True)
+            else:
+                paths=glob.glob(os.path.join(path_prefix, 'new_data', '*', '*', '[0-9]*'),recursive=True)
 
         self.__cost_path = list(map(lambda x: os.path.join( x, 'label.npy'), paths))
         self.__feature_path = list(map(lambda x: os.path.join( x, 'batch_1.npy'), paths))
         self._feature = []
         for fea in self.__feature_path:
             self._feature.append(np.load(fea))
+        print(len(self._feature))
         self._cost = []
         for cost in self.__cost_path:
             self._cost.append(np.load(cost))
